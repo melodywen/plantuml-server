@@ -1,0 +1,17 @@
+FROM plantuml/plantuml-server:jetty
+
+# 设置 Jetty HTTP Header 大小限制
+# 默认值是 8192 字节,这里增加到 65536 字节 (64KB)
+ENV JETTY_OPTS="-Djetty.httpConfig.requestHeaderSize=65536 -Djetty.httpConfig.responseHeaderSize=65536"
+
+# 创建自定义 Jetty 配置文件来覆盖默认设置
+USER root
+RUN echo "# Custom Jetty configuration to increase HTTP header size limit" > /var/lib/jetty/start.d/http-config.ini && \
+    echo "jetty.httpConfig.requestHeaderSize=65536" >> /var/lib/jetty/start.d/http-config.ini && \
+    echo "jetty.httpConfig.responseHeaderSize=65536" >> /var/lib/jetty/start.d/http-config.ini && \
+    chown jetty:jetty /var/lib/jetty/start.d/http-config.ini
+
+USER jetty
+
+# 保持原有的入口点
+ENTRYPOINT ["/entrypoint.sh"]
